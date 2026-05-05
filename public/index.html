@@ -1,0 +1,913 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>TrustVerify — Network-Powered Merchant Protection</title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --navy-950: #040d1a;
+      --navy-900: #071526;
+      --navy-800: #0c1f3a;
+      --navy-700: #112a4e;
+      --navy-600: #163562;
+      --green-500: #00d17a;
+      --green-400: #1aff93;
+      --green-300: #5ffcb0;
+      --green-dim: rgba(0, 209, 122, 0.12);
+      --green-glow: rgba(0, 209, 122, 0.25);
+      --yellow-500: #f5c518;
+      --yellow-dim: rgba(245, 197, 24, 0.15);
+      --red-500: #ff4d4d;
+      --red-dim: rgba(255, 77, 77, 0.15);
+      --text-primary: #e8f0fe;
+      --text-secondary: #8da4c4;
+      --text-muted: #4a6080;
+      --border: rgba(255,255,255,0.07);
+      --card-bg: rgba(255,255,255,0.04);
+      --input-bg: rgba(255,255,255,0.05);
+      --radius: 14px;
+      --radius-sm: 8px;
+    }
+
+    html { scroll-behavior: smooth; }
+
+    body {
+      background: var(--navy-950);
+      background-image:
+        radial-gradient(ellipse 80% 50% at 50% -10%, rgba(0,209,122,0.08) 0%, transparent 70%),
+        radial-gradient(ellipse 60% 40% at 80% 100%, rgba(22,53,98,0.6) 0%, transparent 60%);
+      min-height: 100vh;
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+      color: var(--text-primary);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 40px 16px 80px;
+    }
+
+    /* ── Header ── */
+    header {
+      text-align: center;
+      margin-bottom: 40px;
+    }
+
+    .logo-wrap {
+      display: inline-flex;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 10px;
+    }
+
+    .logo-icon {
+      width: 44px;
+      height: 44px;
+      background: linear-gradient(135deg, var(--green-500), #00a85e);
+      border-radius: 12px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      box-shadow: 0 0 24px var(--green-glow);
+      flex-shrink: 0;
+    }
+
+    .logo-icon svg { width: 24px; height: 24px; }
+
+    .logo-text {
+      font-size: 1.75rem;
+      font-weight: 800;
+      letter-spacing: -0.5px;
+      background: linear-gradient(135deg, #fff 40%, var(--green-400));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+
+    .tagline {
+      font-size: 0.85rem;
+      color: var(--text-secondary);
+      letter-spacing: 0.04em;
+      text-transform: uppercase;
+    }
+
+    .sub-tagline {
+      font-size: 0.78rem;
+      color: var(--text-muted);
+      margin-top: 6px;
+    }
+
+    .vendex-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      margin-top: 14px;
+      padding: 6px 14px;
+      background: transparent;
+      border: 1px solid rgba(0, 209, 122, 0.25);
+      border-radius: 99px;
+      color: var(--green-500);
+      font-size: 0.75rem;
+      font-weight: 600;
+      font-family: inherit;
+      letter-spacing: 0.03em;
+      cursor: pointer;
+      text-decoration: none;
+      transition: background 0.2s, border-color 0.2s, color 0.2s;
+    }
+
+    .vendex-btn:hover {
+      background: var(--green-dim);
+      border-color: rgba(0, 209, 122, 0.5);
+      color: var(--green-400);
+    }
+
+    .vendex-btn svg { flex-shrink: 0; opacity: 0.8; }
+
+    .demo-link {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      margin-top: 10px;
+      padding: 6px 14px;
+      background: rgba(255,255,255,0.04);
+      border: 1px solid rgba(255,255,255,0.1);
+      border-radius: 99px;
+      color: var(--text-secondary);
+      font-size: 0.75rem;
+      font-weight: 600;
+      font-family: inherit;
+      letter-spacing: 0.03em;
+      cursor: pointer;
+      text-decoration: none;
+      transition: background 0.2s, border-color 0.2s, color 0.2s;
+    }
+
+    .demo-link:hover {
+      background: rgba(255,255,255,0.07);
+      border-color: rgba(255,255,255,0.2);
+      color: var(--text-primary);
+    }
+
+    /* ── Main card ── */
+    .main-card {
+      width: 100%;
+      max-width: 480px;
+      background: var(--navy-800);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 32px 28px;
+      box-shadow: 0 24px 64px rgba(0,0,0,0.5), 0 0 0 1px rgba(0,209,122,0.06);
+    }
+
+    .card-title {
+      font-size: 1.2rem;
+      font-weight: 700;
+      margin-bottom: 6px;
+      color: #fff;
+    }
+
+    .card-sub {
+      font-size: 0.82rem;
+      color: var(--text-secondary);
+      margin-bottom: 24px;
+    }
+
+    .field-label {
+      display: block;
+      font-size: 0.78rem;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      color: var(--text-secondary);
+      margin-bottom: 8px;
+    }
+
+    .input-wrap {
+      position: relative;
+    }
+
+    .input-wrap svg {
+      position: absolute;
+      left: 14px;
+      top: 50%;
+      transform: translateY(-50%);
+      color: var(--text-muted);
+      pointer-events: none;
+    }
+
+    input[type="tel"] {
+      width: 100%;
+      background: var(--input-bg);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-sm);
+      color: var(--text-primary);
+      font-size: 1rem;
+      font-family: inherit;
+      padding: 13px 14px 13px 44px;
+      outline: none;
+      transition: border-color 0.2s, box-shadow 0.2s;
+    }
+
+    input[type="tel"]::placeholder { color: var(--text-muted); }
+
+    input[type="tel"]:focus {
+      border-color: var(--green-500);
+      box-shadow: 0 0 0 3px var(--green-dim);
+    }
+
+    .btn {
+      margin-top: 16px;
+      width: 100%;
+      padding: 14px;
+      background: linear-gradient(135deg, var(--green-500) 0%, #00a85e 100%);
+      border: none;
+      border-radius: var(--radius-sm);
+      color: #03100a;
+      font-size: 0.95rem;
+      font-weight: 700;
+      font-family: inherit;
+      letter-spacing: 0.02em;
+      cursor: pointer;
+      transition: opacity 0.2s, transform 0.15s, box-shadow 0.2s;
+      box-shadow: 0 4px 20px var(--green-glow);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+    }
+
+    .btn:hover:not(:disabled) {
+      opacity: 0.9;
+      transform: translateY(-1px);
+      box-shadow: 0 6px 28px rgba(0,209,122,0.4);
+    }
+
+    .btn:active:not(:disabled) { transform: translateY(0); }
+
+    .btn:disabled {
+      opacity: 0.6;
+      cursor: not-allowed;
+    }
+
+    /* ── Spinner ── */
+    .spinner {
+      width: 18px;
+      height: 18px;
+      border: 2px solid rgba(3,16,10,0.3);
+      border-top-color: #03100a;
+      border-radius: 50%;
+      animation: spin 0.7s linear infinite;
+      display: none;
+    }
+
+    .btn.loading .spinner { display: block; }
+    .btn.loading .btn-label { display: none; }
+
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    /* ── Divider ── */
+    .divider {
+      border: none;
+      border-top: 1px solid var(--border);
+      margin: 28px 0;
+    }
+
+    /* ── Results ── */
+    #results { display: none; }
+
+    .result-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 20px;
+      flex-wrap: wrap;
+      gap: 12px;
+    }
+
+    .risk-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 7px;
+      padding: 6px 14px;
+      border-radius: 99px;
+      font-size: 0.8rem;
+      font-weight: 700;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+    }
+
+    .risk-badge .dot {
+      width: 7px;
+      height: 7px;
+      border-radius: 50%;
+    }
+
+    .risk-badge.LOW {
+      background: var(--green-dim);
+      color: var(--green-400);
+      border: 1px solid rgba(0,209,122,0.3);
+    }
+    .risk-badge.LOW .dot { background: var(--green-500); box-shadow: 0 0 6px var(--green-500); }
+
+    .risk-badge.MEDIUM {
+      background: var(--yellow-dim);
+      color: var(--yellow-500);
+      border: 1px solid rgba(245,197,24,0.3);
+    }
+    .risk-badge.MEDIUM .dot { background: var(--yellow-500); box-shadow: 0 0 6px var(--yellow-500); }
+
+    .risk-badge.HIGH {
+      background: var(--red-dim);
+      color: var(--red-500);
+      border: 1px solid rgba(255,77,77,0.3);
+    }
+    .risk-badge.HIGH .dot { background: var(--red-500); box-shadow: 0 0 6px var(--red-500); animation: pulse-red 1.2s ease-in-out infinite; }
+
+    @keyframes pulse-red {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.4; }
+    }
+
+    .score-wrap { text-align: right; }
+
+    .score-label {
+      font-size: 0.72rem;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+    }
+
+    .score-value {
+      font-size: 1.8rem;
+      font-weight: 800;
+      line-height: 1;
+    }
+
+    .score-value span { font-size: 0.9rem; font-weight: 400; color: var(--text-muted); }
+
+    /* ── Score bar ── */
+    .score-bar-wrap { margin-bottom: 20px; }
+
+    .score-bar-track {
+      height: 6px;
+      background: rgba(255,255,255,0.07);
+      border-radius: 99px;
+      overflow: hidden;
+    }
+
+    .score-bar-fill {
+      height: 100%;
+      border-radius: 99px;
+      transition: width 0.8s cubic-bezier(.4,0,.2,1);
+    }
+
+    /* ── Recommendation ── */
+    .recommendation {
+      padding: 12px 16px;
+      border-radius: var(--radius-sm);
+      font-size: 0.88rem;
+      line-height: 1.5;
+      margin-bottom: 20px;
+      display: flex;
+      align-items: flex-start;
+      gap: 10px;
+    }
+
+    .recommendation svg { flex-shrink: 0; margin-top: 1px; }
+
+    .recommendation.LOW { background: var(--green-dim); color: var(--green-300); border-left: 3px solid var(--green-500); }
+    .recommendation.MEDIUM { background: var(--yellow-dim); color: #f5d97a; border-left: 3px solid var(--yellow-500); }
+    .recommendation.HIGH { background: var(--red-dim); color: #ff9090; border-left: 3px solid var(--red-500); }
+
+    /* ── Breakdown grid ── */
+    .breakdown-title {
+      font-size: 0.72rem;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      color: var(--text-muted);
+      margin-bottom: 12px;
+    }
+
+    .breakdown-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr 1fr;
+      gap: 10px;
+      margin-bottom: 16px;
+    }
+
+    .breakdown-card {
+      background: var(--card-bg);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-sm);
+      padding: 14px 10px;
+      text-align: center;
+    }
+
+    .breakdown-icon {
+      width: 32px;
+      height: 32px;
+      border-radius: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin: 0 auto 8px;
+    }
+
+    .breakdown-icon.pass { background: var(--green-dim); color: var(--green-500); }
+    .breakdown-icon.fail { background: var(--red-dim); color: var(--red-500); }
+    .breakdown-icon.warn { background: var(--yellow-dim); color: var(--yellow-500); }
+    .breakdown-icon.neutral { background: rgba(255,255,255,0.05); color: var(--text-muted); }
+
+    .breakdown-name {
+      font-size: 0.7rem;
+      color: var(--text-muted);
+      margin-bottom: 4px;
+      line-height: 1.3;
+    }
+
+    .breakdown-val {
+      font-size: 0.78rem;
+      font-weight: 600;
+      color: var(--text-primary);
+      margin-bottom: 5px;
+    }
+
+    .breakdown-pts {
+      display: inline-block;
+      font-size: 0.67rem;
+      font-weight: 700;
+      padding: 2px 7px;
+      border-radius: 99px;
+      letter-spacing: 0.03em;
+    }
+
+    .breakdown-pts.flagged {
+      background: var(--red-dim);
+      color: var(--red-500);
+      border: 1px solid rgba(255,77,77,0.2);
+    }
+
+    .breakdown-pts.clean {
+      background: rgba(255,255,255,0.04);
+      color: var(--text-muted);
+      border: 1px solid var(--border);
+    }
+
+    /* ── Alert pill ── */
+    .alert-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 10px 14px;
+      background: var(--card-bg);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-sm);
+      font-size: 0.82rem;
+    }
+
+    .alert-label { color: var(--text-secondary); display: flex; align-items: center; gap: 8px; }
+
+    .alert-status {
+      font-size: 0.75rem;
+      font-weight: 700;
+      padding: 3px 10px;
+      border-radius: 99px;
+    }
+
+    .alert-status.sent {
+      background: var(--green-dim);
+      color: var(--green-400);
+      border: 1px solid rgba(0,209,122,0.25);
+    }
+
+    .alert-status.not-sent {
+      background: rgba(255,255,255,0.05);
+      color: var(--text-muted);
+      border: 1px solid var(--border);
+    }
+
+    /* ── Error ── */
+    #error-box {
+      display: none;
+      margin-top: 16px;
+      padding: 12px 16px;
+      background: var(--red-dim);
+      border: 1px solid rgba(255,77,77,0.3);
+      border-radius: var(--radius-sm);
+      color: #ff9090;
+      font-size: 0.85rem;
+      line-height: 1.5;
+    }
+
+    /* ── Footer ── */
+    footer {
+      margin-top: 32px;
+      font-size: 0.75rem;
+      color: var(--text-muted);
+      text-align: center;
+      line-height: 1.8;
+    }
+
+    footer a { color: var(--green-500); text-decoration: none; }
+
+    /* ── Powered by bar ── */
+    .powered-by {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+      margin-top: 14px;
+      flex-wrap: wrap;
+    }
+
+    .powered-pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 4px 10px;
+      background: var(--card-bg);
+      border: 1px solid var(--border);
+      border-radius: 99px;
+      font-size: 0.7rem;
+      color: var(--text-muted);
+    }
+
+    .powered-pill svg { opacity: 0.7; }
+
+    /* ── Responsive ── */
+    @media (max-width: 420px) {
+      .main-card { padding: 24px 18px; }
+      .breakdown-grid { grid-template-columns: 1fr; }
+      .breakdown-card { display: flex; align-items: center; gap: 12px; text-align: left; padding: 10px 14px; }
+      .breakdown-icon { margin: 0; flex-shrink: 0; }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Header -->
+  <header>
+    <div class="logo-wrap">
+      <div class="logo-icon">
+        <svg viewBox="0 0 24 24" fill="none" stroke="#03100a" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
+          <polyline points="9 12 11 14 15 10"/>
+        </svg>
+      </div>
+      <span class="logo-text">TrustVerify</span>
+    </div>
+    <p class="tagline">Network-Powered Merchant Protection</p>
+    <p class="sub-tagline">The trust and verification layer for VendEx merchants</p>
+    <a class="demo-link" href="/demo.html">
+      <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+        <rect x="2" y="3" width="20" height="14" rx="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/>
+      </svg>
+      View Integration Demo
+    </a>
+    <a class="vendex-btn" href="https://vendex.techwithoutchaos.com" target="_blank" rel="noopener noreferrer">
+      Powered by VendEx
+      <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/>
+        <polyline points="15 3 21 3 21 9"/>
+        <line x1="10" y1="14" x2="21" y2="3"/>
+      </svg>
+    </a>
+  </header>
+
+  <!-- Main card -->
+  <div class="main-card">
+    <p class="card-title">Verify Merchant</p>
+    <p class="card-sub">Enter the merchant's phone number to run a real-time network risk check.</p>
+
+    <label class="field-label" for="phone-input">Phone Number</label>
+    <div class="input-wrap">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07A19.5 19.5 0 0 1 4.69 12 19.79 19.79 0 0 1 1.61 3.18 2 2 0 0 1 3.6 1h3a2 2 0 0 1 2 1.72c.127.96.361 1.903.7 2.81a2 2 0 0 1-.45 2.11L7.91 8.6a16 16 0 0 0 6 6l.96-.96a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"/>
+      </svg>
+      <input
+        type="tel"
+        id="phone-input"
+        placeholder="+99999991000"
+        autocomplete="off"
+        spellcheck="false"
+      />
+    </div>
+
+    <button class="btn" id="verify-btn" onclick="runVerification()">
+      <div class="spinner"></div>
+      <span class="btn-label">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="display:inline;vertical-align:middle;margin-right:6px">
+          <circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/>
+        </svg>
+        Run Verification
+      </span>
+    </button>
+
+    <div id="error-box"></div>
+
+    <!-- Results -->
+    <div id="results">
+      <hr class="divider" />
+
+      <!-- Risk level + score -->
+      <div class="result-header">
+        <div>
+          <div style="font-size:0.72rem;color:var(--text-muted);text-transform:uppercase;letter-spacing:.06em;margin-bottom:6px">Risk Level</div>
+          <div class="risk-badge" id="risk-badge"><span class="dot"></span><span id="risk-label">—</span></div>
+        </div>
+        <div class="score-wrap">
+          <div class="score-label">Risk Score</div>
+          <div class="score-value" id="score-display">—<span>/100</span></div>
+        </div>
+      </div>
+
+      <!-- Score bar -->
+      <div class="score-bar-wrap">
+        <div class="score-bar-track">
+          <div class="score-bar-fill" id="score-bar" style="width:0%"></div>
+        </div>
+      </div>
+
+      <!-- Recommendation -->
+      <div class="recommendation" id="recommendation-box">
+        <svg id="rec-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/>
+        </svg>
+        <span id="recommendation-text"></span>
+      </div>
+
+      <!-- Breakdown -->
+      <div class="breakdown-title">Signal Breakdown</div>
+      <div class="breakdown-grid">
+
+        <div class="breakdown-card" id="card-verification">
+          <div class="breakdown-icon" id="icon-verification">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
+            </svg>
+          </div>
+          <div class="breakdown-name">Number<br>Verification</div>
+          <div class="breakdown-val" id="val-verification">—</div>
+          <div class="breakdown-pts clean" id="pts-verification">+0 pts</div>
+        </div>
+
+        <div class="breakdown-card" id="card-simswap">
+          <div class="breakdown-icon" id="icon-simswap">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M7 8l-4 4 4 4"/><path d="M17 8l4 4-4 4"/><line x1="3" y1="12" x2="21" y2="12"/>
+            </svg>
+          </div>
+          <div class="breakdown-name">Device Swap<br>Detection</div>
+          <div class="breakdown-val" id="val-simswap">—</div>
+          <div class="breakdown-pts clean" id="pts-simswap">+0 pts</div>
+        </div>
+
+        <div class="breakdown-card" id="card-callforwarding">
+          <div class="breakdown-icon" id="icon-callforwarding">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+              <polyline points="15 3 21 3 21 9"/><path d="M10 14L21 3"/><path d="M21 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07A19.5 19.5 0 0 1 4.69 12"/>
+            </svg>
+          </div>
+          <div class="breakdown-name">Call<br>Forwarding</div>
+          <div class="breakdown-val" id="val-callforwarding">—</div>
+          <div class="breakdown-pts clean" id="pts-callforwarding">+0 pts</div>
+        </div>
+
+        <div class="breakdown-card" id="card-kycmatch">
+          <div class="breakdown-icon" id="icon-kycmatch">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/>
+            </svg>
+          </div>
+          <div class="breakdown-name">KYC<br>Match</div>
+          <div class="breakdown-val" id="val-kycmatch">—</div>
+          <div class="breakdown-pts clean" id="pts-kycmatch">+0 pts</div>
+        </div>
+
+        <div class="breakdown-card" id="card-location">
+          <div class="breakdown-icon" id="icon-location">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/>
+            </svg>
+          </div>
+          <div class="breakdown-name">Location<br>Verification</div>
+          <div class="breakdown-val" id="val-location">—</div>
+          <div class="breakdown-pts clean" id="pts-location">+0 pts</div>
+        </div>
+
+        <div class="breakdown-card" id="card-device">
+          <div class="breakdown-icon" id="icon-device">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+              <rect x="5" y="2" width="14" height="20" rx="2" ry="2"/><line x1="12" y1="18" x2="12.01" y2="18"/>
+            </svg>
+          </div>
+          <div class="breakdown-name">Device<br>Status</div>
+          <div class="breakdown-val" id="val-device">—</div>
+          <div class="breakdown-pts clean" id="pts-device">+0 pts</div>
+        </div>
+
+      </div>
+
+      <!-- WhatsApp alert -->
+      <div class="alert-row">
+        <span class="alert-label">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>
+          </svg>
+          WhatsApp Merchant Alert
+        </span>
+        <span class="alert-status" id="alert-status">—</span>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- Footer -->
+  <footer>
+    <div>Powered by Nokia Network as Code &nbsp;·&nbsp; Twilio WhatsApp &nbsp;·&nbsp; Supabase</div>
+    <div class="powered-by">
+      <span class="powered-pill">
+        <svg width="10" height="10" viewBox="0 0 24 24" fill="var(--green-500)"><circle cx="12" cy="12" r="10"/></svg>
+        Live Network Signals
+      </span>
+      <span class="powered-pill">
+        <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+        Bank-Grade Security
+      </span>
+      <span class="powered-pill">
+        <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
+        Real-Time Decisioning
+      </span>
+    </div>
+  </footer>
+
+  <script>
+    async function runVerification() {
+      const input = document.getElementById('phone-input');
+      const btn = document.getElementById('verify-btn');
+      const errorBox = document.getElementById('error-box');
+      const results = document.getElementById('results');
+
+      const phone = input.value.trim();
+      if (!phone) {
+        showError('Please enter a phone number.');
+        return;
+      }
+
+      // Reset UI
+      errorBox.style.display = 'none';
+      results.style.display = 'none';
+      btn.classList.add('loading');
+      btn.disabled = true;
+
+      try {
+        const isHighDemo = phone === '+99999990000';
+        const url = isHighDemo ? 'http://localhost:3000/api/verify/demo' : 'http://localhost:3000/api/verify';
+        const body = isHighDemo ? { phoneNumber: phone, scenario: 'high' } : { phoneNumber: phone };
+
+        const res = await fetch(url, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(body),
+        });
+
+        const data = await res.json();
+
+        if (!res.ok || !data.success) {
+          throw new Error(data.error || 'Verification failed. Please try again.');
+        }
+
+        renderResults(data);
+      } catch (err) {
+        showError(err.message || 'Network error. Is the TrustVerify server running?');
+      } finally {
+        btn.classList.remove('loading');
+        btn.disabled = false;
+      }
+    }
+
+    const ICON_X = '<line x1="15" y1="9" x2="9" y2="15"/><line x1="9" y1="9" x2="15" y2="15"/>';
+
+    function renderResults(data) {
+      const { riskLevel, score, recommendation, breakdown, alertSent } = data;
+
+      // Badge
+      const badge = document.getElementById('risk-badge');
+      badge.className = `risk-badge ${riskLevel}`;
+      document.getElementById('risk-label').textContent = riskLevel;
+
+      // Score
+      document.getElementById('score-display').innerHTML = `${score}<span>/100</span>`;
+
+      // Score bar
+      const bar = document.getElementById('score-bar');
+      const barColor =
+        riskLevel === 'LOW' ? 'var(--green-500)' :
+        riskLevel === 'MEDIUM' ? 'var(--yellow-500)' :
+        'var(--red-500)';
+      bar.style.background = barColor;
+      bar.style.boxShadow = `0 0 10px ${barColor}`;
+      setTimeout(() => { bar.style.width = `${score}%`; }, 50);
+
+      // Recommendation
+      const recBox = document.getElementById('recommendation-box');
+      recBox.className = `recommendation ${riskLevel}`;
+      document.getElementById('recommendation-text').textContent = recommendation;
+
+      // Icons per level
+      const recIconPaths = {
+        LOW: '<circle cx="12" cy="12" r="10"/><polyline points="9 12 11 14 15 10"/>',
+        MEDIUM: '<circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/>',
+        HIGH: '<circle cx="12" cy="12" r="10"/><line x1="15" y1="9" x2="9" y2="15"/><line x1="9" y1="9" x2="15" y2="15"/>',
+      };
+      document.getElementById('rec-icon').innerHTML = recIconPaths[riskLevel];
+
+      // ── Number Verification ──
+      const verified = breakdown.verification.verified;
+      setBreakdownCard('verification',
+        verified ? 'pass' : 'fail',
+        verified ? 'Verified' : 'Unverified',
+        verified ? '<polyline points="9 12 11 14 15 10"/>' : ICON_X,
+        verified ? 0 : 25
+      );
+
+      // ── Device Swap Detection ──
+      const swapped = breakdown.simSwap.swapDetected;
+      setBreakdownCard('simswap',
+        swapped ? 'fail' : 'pass',
+        swapped ? 'Swap Detected' : 'No Swap',
+        swapped ? ICON_X : '<polyline points="9 12 11 14 15 10"/>',
+        swapped ? 25 : 0
+      );
+
+      // ── Call Forwarding ──
+      const cf = breakdown.callForwarding && breakdown.callForwarding.callForwarding;
+      setBreakdownCard('callforwarding',
+        cf ? 'fail' : 'pass',
+        cf ? 'Active' : 'Inactive',
+        cf ? ICON_X : '<polyline points="9 12 11 14 15 10"/>',
+        cf ? 20 : 0
+      );
+
+      // ── KYC Match ──
+      const kyc = breakdown.kycMatch && breakdown.kycMatch.kycMatch;
+      setBreakdownCard('kycmatch',
+        kyc ? 'pass' : 'fail',
+        kyc ? 'Name Match' : 'No Match',
+        kyc ? '<polyline points="9 12 11 14 15 10"/>' : ICON_X,
+        kyc ? 0 : 15
+      );
+
+      // ── Location Verification ──
+      const locMatch = breakdown.location && breakdown.location.locationMatch;
+      setBreakdownCard('location',
+        locMatch ? 'pass' : 'fail',
+        locMatch ? 'In Region' : 'Out of Region',
+        locMatch ? '<polyline points="9 12 11 14 15 10"/>' : ICON_X,
+        locMatch ? 0 : 10
+      );
+
+      // ── Device Status ──
+      const status = (breakdown.deviceStatus && breakdown.deviceStatus.status) || 'UNKNOWN';
+      const statusClass  = status === 'CONNECTED_DATA' ? 'pass' : status === 'CONNECTED_SMS' ? 'warn' : status === 'NOT_CONNECTED' ? 'fail' : 'neutral';
+      const statusLabel  = status === 'CONNECTED_DATA' ? 'Data Active' : status === 'CONNECTED_SMS' ? 'SMS Only' : status === 'NOT_CONNECTED' ? 'Offline' : status.replace(/_/g, ' ');
+      const statusIcon   = status === 'CONNECTED_DATA' ? '<polyline points="9 12 11 14 15 10"/>' : status === 'CONNECTED_SMS' ? '<line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/>' : ICON_X;
+      setBreakdownCard('device', statusClass, statusLabel, statusIcon, status === 'NOT_CONNECTED' ? 5 : 0);
+
+      // ── WhatsApp alert ──
+      const alertEl = document.getElementById('alert-status');
+      alertEl.textContent = alertSent ? 'Sent' : 'Not Sent';
+      alertEl.className = `alert-status ${alertSent ? 'sent' : 'not-sent'}`;
+
+      // Show
+      document.getElementById('results').style.display = 'block';
+      document.getElementById('results').scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+    }
+
+    function setBreakdownCard(id, cssClass, label, iconPath, points) {
+      const icon = document.getElementById(`icon-${id}`);
+      icon.className = `breakdown-icon ${cssClass}`;
+      icon.innerHTML = `<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">${iconPath}</svg>`;
+      document.getElementById(`val-${id}`).textContent = label;
+      const ptsEl = document.getElementById(`pts-${id}`);
+      ptsEl.textContent = points > 0 ? `+${points} pts` : '+0 pts';
+      ptsEl.className = `breakdown-pts ${points > 0 ? 'flagged' : 'clean'}`;
+    }
+
+    function showError(msg) {
+      const errorBox = document.getElementById('error-box');
+      errorBox.textContent = msg;
+      errorBox.style.display = 'block';
+    }
+
+    // Allow Enter key to submit
+    document.getElementById('phone-input').addEventListener('keydown', e => {
+      if (e.key === 'Enter') runVerification();
+    });
+  </script>
+
+</body>
+</html>

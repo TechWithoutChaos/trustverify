@@ -1,0 +1,1102 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>TrustVerify × VendEx — Integration Demo</title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --vendex-green:      #00b14f;
+      --vendex-green-dark: #008f3f;
+      --vendex-green-dim:  rgba(0,177,79,0.1);
+      --vendex-green-glow: rgba(0,177,79,0.25);
+      --vendex-bg:         #f4faf7;
+      --vendex-border:     #d0ead9;
+      --vendex-text:       #0d2b1a;
+      --vendex-muted:      #5a8070;
+
+      --tv-950:   #040d1a;
+      --tv-800:   #0c1f3a;
+      --tv-700:   #112a4e;
+      --tv-green: #00d17a;
+      --tv-green-dim: rgba(0,209,122,0.12);
+      --tv-green-glow: rgba(0,209,122,0.3);
+      --tv-border: rgba(255,255,255,0.07);
+      --tv-muted:  #4a6080;
+      --tv-secondary: #8da4c4;
+      --tv-text:  #e8f0fe;
+
+      --yellow: #f5c518;
+      --yellow-dim: rgba(245,197,24,0.15);
+      --red:    #ff4d4d;
+      --red-dim: rgba(255,77,77,0.15);
+
+      --radius: 14px;
+      --radius-sm: 9px;
+    }
+
+    html, body { height: 100%; }
+
+    body {
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+      display: flex;
+      flex-direction: column;
+      min-height: 100vh;
+      background: #0a0a0a;
+    }
+
+    /* ── Top bar ── */
+    .topbar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 10px 24px;
+      background: #050d1c;
+      border-bottom: 1px solid rgba(255,255,255,0.06);
+      flex-shrink: 0;
+    }
+
+    .topbar-left {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      font-size: 0.78rem;
+      color: var(--tv-secondary);
+    }
+
+    .topbar-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      padding: 3px 10px;
+      border-radius: 99px;
+      font-size: 0.7rem;
+      font-weight: 700;
+      letter-spacing: 0.05em;
+      text-transform: uppercase;
+    }
+
+    .badge-live {
+      background: var(--tv-green-dim);
+      color: var(--tv-green);
+      border: 1px solid rgba(0,209,122,0.3);
+    }
+
+    .badge-live::before {
+      content: '';
+      width: 6px; height: 6px;
+      border-radius: 50%;
+      background: var(--tv-green);
+      animation: pulse-green 1.4s ease-in-out infinite;
+    }
+
+    @keyframes pulse-green { 0%,100%{opacity:1;} 50%{opacity:0.3;} }
+
+    .topbar-right {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+    }
+
+    .topbar-link {
+      font-size: 0.75rem;
+      color: var(--tv-secondary);
+      text-decoration: none;
+      transition: color 0.2s;
+    }
+    .topbar-link:hover { color: var(--tv-green); }
+
+    /* ── Split layout ── */
+    .split {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      flex: 1;
+      min-height: 0;
+    }
+
+    /* ══════════ LEFT — VendEx ══════════ */
+    .left-panel {
+      background: var(--vendex-bg);
+      display: flex;
+      flex-direction: column;
+      padding: 40px 36px;
+      overflow-y: auto;
+    }
+
+    .vendex-logo-wrap {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin-bottom: 28px;
+    }
+
+    .vendex-logo-icon {
+      width: 40px; height: 40px;
+      background: linear-gradient(135deg, var(--vendex-green), var(--vendex-green-dark));
+      border-radius: 10px;
+      display: flex; align-items: center; justify-content: center;
+      box-shadow: 0 4px 14px var(--vendex-green-glow);
+    }
+
+    .vendex-logo-icon svg { width: 22px; height: 22px; }
+
+    .vendex-logo-text {
+      font-size: 1.5rem;
+      font-weight: 800;
+      color: var(--vendex-green-dark);
+      letter-spacing: -0.5px;
+    }
+
+    .left-title {
+      font-size: 1.35rem;
+      font-weight: 700;
+      color: var(--vendex-text);
+      margin-bottom: 4px;
+    }
+
+    .left-subtitle {
+      font-size: 0.83rem;
+      color: var(--vendex-muted);
+      margin-bottom: 28px;
+    }
+
+    .field-group {
+      margin-bottom: 16px;
+    }
+
+    .field-label {
+      display: block;
+      font-size: 0.75rem;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      color: var(--vendex-muted);
+      margin-bottom: 6px;
+    }
+
+    .field-input {
+      width: 100%;
+      padding: 11px 14px;
+      background: #fff;
+      border: 1.5px solid var(--vendex-border);
+      border-radius: var(--radius-sm);
+      font-size: 0.92rem;
+      font-family: inherit;
+      color: var(--vendex-text);
+      outline: none;
+      transition: border-color 0.2s, box-shadow 0.2s;
+    }
+
+    .field-input::placeholder { color: #aac4b5; }
+
+    .field-input:focus {
+      border-color: var(--vendex-green);
+      box-shadow: 0 0 0 3px var(--vendex-green-dim);
+    }
+
+    .field-row {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+    }
+
+    .register-btn {
+      width: 100%;
+      margin-top: 6px;
+      padding: 13px;
+      background: linear-gradient(135deg, var(--vendex-green) 0%, var(--vendex-green-dark) 100%);
+      border: none;
+      border-radius: var(--radius-sm);
+      color: #fff;
+      font-size: 0.95rem;
+      font-weight: 700;
+      font-family: inherit;
+      cursor: pointer;
+      transition: opacity 0.2s, transform 0.15s, box-shadow 0.2s;
+      box-shadow: 0 4px 16px var(--vendex-green-glow);
+      display: flex; align-items: center; justify-content: center; gap: 8px;
+    }
+
+    .register-btn:hover:not(:disabled) {
+      opacity: 0.92;
+      transform: translateY(-1px);
+      box-shadow: 0 6px 24px rgba(0,177,79,0.45);
+    }
+
+    .register-btn:disabled { opacity: 0.6; cursor: not-allowed; }
+
+    .register-btn .spinner {
+      width: 16px; height: 16px;
+      border: 2px solid rgba(255,255,255,0.3);
+      border-top-color: #fff;
+      border-radius: 50%;
+      animation: spin 0.7s linear infinite;
+      display: none;
+    }
+
+    .register-btn.loading .spinner { display: block; }
+    .register-btn.loading .btn-label { display: none; }
+
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    .powered-note {
+      text-align: center;
+      margin-top: 14px;
+      font-size: 0.72rem;
+      color: var(--vendex-muted);
+    }
+
+    .powered-note strong { color: var(--vendex-green-dark); }
+
+    /* ══════════ RIGHT — TrustVerify ══════════ */
+    .right-panel {
+      background: var(--tv-950);
+      background-image: radial-gradient(ellipse 70% 40% at 50% 0%, rgba(0,209,122,0.07) 0%, transparent 70%);
+      display: flex;
+      flex-direction: column;
+      padding: 40px 36px;
+      overflow-y: auto;
+    }
+
+    .tv-header {
+      margin-bottom: 28px;
+    }
+
+    .tv-logo-wrap {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin-bottom: 10px;
+    }
+
+    .tv-logo-icon {
+      width: 36px; height: 36px;
+      background: linear-gradient(135deg, var(--tv-green), #00a85e);
+      border-radius: 9px;
+      display: flex; align-items: center; justify-content: center;
+      box-shadow: 0 0 18px var(--tv-green-glow);
+    }
+
+    .tv-logo-icon svg { width: 18px; height: 18px; }
+
+    .tv-logo-text {
+      font-size: 1.15rem;
+      font-weight: 800;
+      background: linear-gradient(135deg, #fff 40%, var(--tv-green));
+      -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+
+    .tv-title {
+      font-size: 1.2rem;
+      font-weight: 700;
+      color: var(--tv-text);
+      margin-bottom: 3px;
+    }
+
+    .tv-subtitle {
+      font-size: 0.78rem;
+      color: var(--tv-secondary);
+    }
+
+    /* ── Waiting state ── */
+    #waiting-state {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      gap: 14px;
+      padding: 40px 0;
+    }
+
+    .waiting-icon {
+      width: 64px; height: 64px;
+      border-radius: 16px;
+      background: rgba(255,255,255,0.04);
+      border: 1px solid var(--tv-border);
+      display: flex; align-items: center; justify-content: center;
+      color: var(--tv-muted);
+    }
+
+    .waiting-title {
+      font-size: 0.95rem;
+      font-weight: 600;
+      color: var(--tv-secondary);
+    }
+
+    .waiting-sub {
+      font-size: 0.78rem;
+      color: var(--tv-muted);
+      max-width: 240px;
+      line-height: 1.6;
+    }
+
+    /* ── Live feed ── */
+    #live-feed { display: none; flex-direction: column; gap: 0; }
+
+    .merchant-info-bar {
+      background: rgba(0,209,122,0.06);
+      border: 1px solid rgba(0,209,122,0.15);
+      border-radius: var(--radius-sm);
+      padding: 10px 14px;
+      margin-bottom: 18px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .merchant-info-bar svg { color: var(--tv-green); flex-shrink: 0; }
+
+    .merchant-info-text { font-size: 0.8rem; }
+    .merchant-info-text strong { color: var(--tv-text); display: block; font-size: 0.88rem; }
+    .merchant-info-text span { color: var(--tv-secondary); }
+
+    .checks-label {
+      font-size: 0.68rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      color: var(--tv-muted);
+      margin-bottom: 10px;
+    }
+
+    .check-row {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 10px 12px;
+      border-radius: var(--radius-sm);
+      margin-bottom: 4px;
+      transition: background 0.2s;
+      background: transparent;
+    }
+
+    .check-row.active { background: rgba(255,255,255,0.03); }
+    .check-row.done-pass { background: var(--tv-green-dim); }
+    .check-row.done-fail { background: var(--red-dim); }
+    .check-row.done-warn { background: var(--yellow-dim); }
+
+    .check-icon {
+      width: 28px; height: 28px;
+      border-radius: 7px;
+      display: flex; align-items: center; justify-content: center;
+      flex-shrink: 0;
+      background: rgba(255,255,255,0.05);
+      color: var(--tv-muted);
+    }
+
+    .check-icon.pass { background: var(--tv-green-dim); color: var(--tv-green); }
+    .check-icon.fail { background: var(--red-dim); color: var(--red); }
+    .check-icon.warn { background: var(--yellow-dim); color: var(--yellow); }
+    .check-icon.spinning { background: rgba(255,255,255,0.05); color: var(--tv-secondary); }
+
+    .check-icon .mini-spinner {
+      width: 12px; height: 12px;
+      border: 2px solid rgba(255,255,255,0.15);
+      border-top-color: var(--tv-secondary);
+      border-radius: 50%;
+      animation: spin 0.6s linear infinite;
+    }
+
+    .check-body { flex: 1; min-width: 0; }
+
+    .check-name {
+      font-size: 0.82rem;
+      font-weight: 600;
+      color: var(--tv-text);
+      margin-bottom: 2px;
+    }
+
+    .check-status {
+      font-size: 0.7rem;
+      color: var(--tv-muted);
+    }
+
+    .check-pts {
+      font-size: 0.7rem;
+      font-weight: 700;
+      padding: 2px 8px;
+      border-radius: 99px;
+    }
+
+    .check-pts.flagged {
+      background: var(--red-dim);
+      color: var(--red);
+      border: 1px solid rgba(255,77,77,0.2);
+    }
+
+    .check-pts.clean {
+      background: rgba(255,255,255,0.04);
+      color: var(--tv-muted);
+      border: 1px solid var(--tv-border);
+    }
+
+    /* ── Divider ── */
+    .tv-divider {
+      border: none;
+      border-top: 1px solid var(--tv-border);
+      margin: 16px 0;
+    }
+
+    /* ── Score result ── */
+    #score-result { display: none; }
+
+    .score-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 10px;
+      flex-wrap: wrap;
+      gap: 10px;
+    }
+
+    .risk-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 5px 14px;
+      border-radius: 99px;
+      font-size: 0.78rem;
+      font-weight: 700;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+    }
+
+    .risk-badge .dot {
+      width: 6px; height: 6px;
+      border-radius: 50%;
+    }
+
+    .risk-badge.LOW  { background: var(--tv-green-dim); color: #1aff93; border: 1px solid rgba(0,209,122,0.3); }
+    .risk-badge.LOW .dot  { background: var(--tv-green); box-shadow: 0 0 5px var(--tv-green); }
+    .risk-badge.MEDIUM { background: var(--yellow-dim); color: var(--yellow); border: 1px solid rgba(245,197,24,0.3); }
+    .risk-badge.MEDIUM .dot { background: var(--yellow); box-shadow: 0 0 5px var(--yellow); }
+    .risk-badge.HIGH { background: var(--red-dim); color: var(--red); border: 1px solid rgba(255,77,77,0.3); }
+    .risk-badge.HIGH .dot { background: var(--red); box-shadow: 0 0 5px var(--red); animation: pulse-red 1s ease-in-out infinite; }
+    @keyframes pulse-red { 0%,100%{opacity:1;} 50%{opacity:0.3;} }
+
+    .score-num { font-size: 1.6rem; font-weight: 800; color: #fff; }
+    .score-num span { font-size: 0.85rem; font-weight: 400; color: var(--tv-muted); }
+
+    .score-bar-track {
+      height: 6px;
+      background: rgba(255,255,255,0.07);
+      border-radius: 99px;
+      overflow: hidden;
+      margin-bottom: 14px;
+    }
+
+    .score-bar-fill {
+      height: 100%;
+      border-radius: 99px;
+      transition: width 0.9s cubic-bezier(.4,0,.2,1);
+    }
+
+    .rec-box {
+      padding: 10px 14px;
+      border-radius: var(--radius-sm);
+      font-size: 0.82rem;
+      line-height: 1.5;
+      display: flex;
+      gap: 8px;
+      align-items: flex-start;
+      margin-bottom: 12px;
+    }
+
+    .rec-box.LOW    { background: var(--tv-green-dim); color: #5ffcb0; border-left: 3px solid var(--tv-green); }
+    .rec-box.MEDIUM { background: var(--yellow-dim); color: #f5d97a; border-left: 3px solid var(--yellow); }
+    .rec-box.HIGH   { background: var(--red-dim); color: #ff9090; border-left: 3px solid var(--red); }
+
+    /* ── Alert row ── */
+    .alert-row {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 9px 12px;
+      background: rgba(255,255,255,0.03);
+      border: 1px solid var(--tv-border);
+      border-radius: var(--radius-sm);
+      font-size: 0.8rem;
+      margin-bottom: 10px;
+    }
+
+    .alert-row.sent {
+      background: var(--tv-green-dim);
+      border-color: rgba(0,209,122,0.25);
+      color: #5ffcb0;
+    }
+
+    /* ── Agent decision ── */
+    .agent-box {
+      border-radius: var(--radius-sm);
+      padding: 14px;
+      border: 1px solid var(--tv-border);
+      background: rgba(255,255,255,0.03);
+    }
+
+    .agent-box.block { border-color: rgba(255,77,77,0.3); background: var(--red-dim); }
+    .agent-box.approve { border-color: rgba(0,209,122,0.25); background: var(--tv-green-dim); }
+
+    .agent-label {
+      font-size: 0.67rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      color: var(--tv-muted);
+      margin-bottom: 6px;
+    }
+
+    .agent-decision-badge {
+      font-size: 1rem;
+      font-weight: 800;
+      margin-bottom: 8px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .agent-decision-badge.block { color: var(--red); }
+    .agent-decision-badge.approve { color: var(--tv-green); }
+
+    .agent-reasoning {
+      font-size: 0.77rem;
+      color: var(--tv-secondary);
+      line-height: 1.5;
+      margin-bottom: 8px;
+    }
+
+    .agent-likelihood {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 0.72rem;
+      color: var(--tv-muted);
+    }
+
+    .likelihood-bar-track {
+      flex: 1;
+      height: 4px;
+      background: rgba(255,255,255,0.07);
+      border-radius: 99px;
+      overflow: hidden;
+    }
+
+    .likelihood-bar-fill {
+      height: 100%;
+      border-radius: 99px;
+    }
+
+    /* ── Mobile ── */
+    @media (max-width: 768px) {
+      .split { grid-template-columns: 1fr; }
+      .left-panel, .right-panel { padding: 28px 20px; }
+      .field-row { grid-template-columns: 1fr; }
+      .topbar { padding: 8px 16px; }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Top bar -->
+  <div class="topbar">
+    <div class="topbar-left">
+      <span class="topbar-badge badge-live">Live Demo</span>
+      <span>VendEx × TrustVerify Integration</span>
+    </div>
+    <div class="topbar-right">
+      <a href="/" class="topbar-link">← Back to TrustVerify</a>
+    </div>
+  </div>
+
+  <!-- Split layout -->
+  <div class="split">
+
+    <!-- ═══ LEFT — VendEx ═══ -->
+    <div class="left-panel">
+
+      <div class="vendex-logo-wrap">
+        <div class="vendex-logo-icon">
+          <svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M6 2L3 6v14a2 2 0 002 2h14a2 2 0 002-2V6l-3-4z"/>
+            <line x1="3" y1="6" x2="21" y2="6"/>
+            <path d="M16 10a4 4 0 01-8 0"/>
+          </svg>
+        </div>
+        <span class="vendex-logo-text">VendEx</span>
+      </div>
+
+      <p class="left-title">Merchant Registration</p>
+      <p class="left-subtitle">Register your business to start accepting payments on VendEx.</p>
+
+      <form id="reg-form" onsubmit="handleSubmit(event)">
+
+        <div class="field-group">
+          <label class="field-label" for="business-name">Business Name</label>
+          <input class="field-input" type="text" id="business-name" placeholder="e.g. Mama Nkechi Kitchen" required />
+        </div>
+
+        <div class="field-group">
+          <label class="field-label" for="owner-name">Owner Name</label>
+          <input class="field-input" type="text" id="owner-name" placeholder="e.g. Nkechi Okonkwo" required />
+        </div>
+
+        <div class="field-group">
+          <label class="field-label" for="phone">Phone Number</label>
+          <input class="field-input" type="tel" id="phone" placeholder="+99999991000" required autocomplete="off" />
+        </div>
+
+        <div class="field-row">
+          <div class="field-group">
+            <label class="field-label" for="location">Business Location</label>
+            <select class="field-input" id="location" required>
+              <option value="" disabled selected>Select city</option>
+              <option value="Lagos">Lagos</option>
+              <option value="Abuja">Abuja</option>
+              <option value="Kano">Kano</option>
+              <option value="Port Harcourt">Port Harcourt</option>
+              <option value="Ibadan">Ibadan</option>
+            </select>
+          </div>
+
+          <div class="field-group">
+            <label class="field-label" for="biz-type">Business Type</label>
+            <select class="field-input" id="biz-type" required>
+              <option value="" disabled selected>Select type</option>
+              <option value="Retail">Retail</option>
+              <option value="Food & Beverage">Food & Beverage</option>
+              <option value="Fashion">Fashion</option>
+              <option value="Electronics">Electronics</option>
+              <option value="Other">Other</option>
+            </select>
+          </div>
+        </div>
+
+        <button class="register-btn" type="submit" id="reg-btn">
+          <div class="spinner"></div>
+          <span class="btn-label">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="display:inline;vertical-align:middle;margin-right:6px">
+              <path d="M22 11.08V12a10 10 0 11-5.93-9.14"/>
+              <polyline points="22 4 12 14.01 9 11.01"/>
+            </svg>
+            Register My Business
+          </span>
+        </button>
+
+      </form>
+
+      <p class="powered-note">
+        Protected by <strong>TrustVerify</strong> network verification
+        <br>Real-time fraud detection powered by Nokia Network as Code
+      </p>
+
+    </div>
+
+    <!-- ═══ RIGHT — TrustVerify ═══ -->
+    <div class="right-panel">
+
+      <div class="tv-header">
+        <div class="tv-logo-wrap">
+          <div class="tv-logo-icon">
+            <svg viewBox="0 0 24 24" fill="none" stroke="#03100a" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
+              <polyline points="9 12 11 14 15 10"/>
+            </svg>
+          </div>
+          <span class="tv-logo-text">TrustVerify</span>
+        </div>
+        <p class="tv-title">Live Verification Engine</p>
+        <p class="tv-subtitle">Network signals firing in real time</p>
+      </div>
+
+      <!-- Waiting state -->
+      <div id="waiting-state">
+        <div class="waiting-icon">
+          <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+            <circle cx="12" cy="12" r="10"/>
+            <polyline points="12 6 12 12 16 14"/>
+          </svg>
+        </div>
+        <p class="waiting-title">Waiting for merchant registration...</p>
+        <p class="waiting-sub">Fill in the form on the left and click Register to see TrustVerify fire in real time.</p>
+      </div>
+
+      <!-- Live feed -->
+      <div id="live-feed">
+
+        <div class="merchant-info-bar" id="merchant-bar">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/><circle cx="12" cy="7" r="4"/>
+          </svg>
+          <div class="merchant-info-text">
+            <strong id="bar-name">—</strong>
+            <span id="bar-meta">—</span>
+          </div>
+        </div>
+
+        <p class="checks-label">Signal Checks</p>
+
+        <div id="check-verification" class="check-row">
+          <div class="check-icon" id="ci-verification">
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
+            </svg>
+          </div>
+          <div class="check-body">
+            <div class="check-name">Number Verification</div>
+            <div class="check-status" id="cs-verification">Queued</div>
+          </div>
+          <div class="check-pts clean" id="cp-verification" style="display:none"></div>
+        </div>
+
+        <div id="check-simswap" class="check-row">
+          <div class="check-icon" id="ci-simswap">
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M7 8l-4 4 4 4"/><path d="M17 8l4 4-4 4"/><line x1="3" y1="12" x2="21" y2="12"/>
+            </svg>
+          </div>
+          <div class="check-body">
+            <div class="check-name">Device Swap</div>
+            <div class="check-status" id="cs-simswap">Queued</div>
+          </div>
+          <div class="check-pts clean" id="cp-simswap" style="display:none"></div>
+        </div>
+
+        <div id="check-callforwarding" class="check-row">
+          <div class="check-icon" id="ci-callforwarding">
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+              <polyline points="15 3 21 3 21 9"/><path d="M10 14L21 3"/>
+              <path d="M21 16.92v3a2 2 0 01-2.18 2 19.79 19.79 0 01-8.63-3.07A19.5 19.5 0 014.69 12"/>
+            </svg>
+          </div>
+          <div class="check-body">
+            <div class="check-name">Call Forwarding</div>
+            <div class="check-status" id="cs-callforwarding">Queued</div>
+          </div>
+          <div class="check-pts clean" id="cp-callforwarding" style="display:none"></div>
+        </div>
+
+        <div id="check-kycmatch" class="check-row">
+          <div class="check-icon" id="ci-kycmatch">
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/><circle cx="12" cy="7" r="4"/>
+            </svg>
+          </div>
+          <div class="check-body">
+            <div class="check-name">KYC Match</div>
+            <div class="check-status" id="cs-kycmatch">Queued</div>
+          </div>
+          <div class="check-pts clean" id="cp-kycmatch" style="display:none"></div>
+        </div>
+
+        <div id="check-location" class="check-row">
+          <div class="check-icon" id="ci-location">
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z"/><circle cx="12" cy="10" r="3"/>
+            </svg>
+          </div>
+          <div class="check-body">
+            <div class="check-name">Location Verification</div>
+            <div class="check-status" id="cs-location">Queued</div>
+          </div>
+          <div class="check-pts clean" id="cp-location" style="display:none"></div>
+        </div>
+
+        <div id="check-device" class="check-row">
+          <div class="check-icon" id="ci-device">
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+              <rect x="5" y="2" width="14" height="20" rx="2"/><line x1="12" y1="18" x2="12.01" y2="18"/>
+            </svg>
+          </div>
+          <div class="check-body">
+            <div class="check-name">Device Status</div>
+            <div class="check-status" id="cs-device">Queued</div>
+          </div>
+          <div class="check-pts clean" id="cp-device" style="display:none"></div>
+        </div>
+
+        <!-- Score result -->
+        <div id="score-result">
+          <hr class="tv-divider" />
+
+          <div class="score-row">
+            <div>
+              <div style="font-size:0.67rem;color:var(--tv-muted);text-transform:uppercase;letter-spacing:.06em;margin-bottom:5px">Risk Level</div>
+              <div class="risk-badge" id="risk-badge"><span class="dot"></span><span id="risk-label">—</span></div>
+            </div>
+            <div>
+              <div style="font-size:0.67rem;color:var(--tv-muted);text-transform:uppercase;letter-spacing:.06em;margin-bottom:3px">Risk Score</div>
+              <div class="score-num" id="score-num">—<span>/100</span></div>
+            </div>
+          </div>
+
+          <div class="score-bar-track">
+            <div class="score-bar-fill" id="score-bar" style="width:0%"></div>
+          </div>
+
+          <div class="rec-box" id="rec-box">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" id="rec-icon" style="flex-shrink:0;margin-top:1px">
+              <circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/>
+            </svg>
+            <span id="rec-text"></span>
+          </div>
+
+          <div class="alert-row" id="alert-row" style="display:none">
+            <span style="font-size:1rem">📱</span>
+            <span id="alert-text"></span>
+          </div>
+
+          <div class="agent-box" id="agent-box" style="display:none">
+            <div class="agent-label">AI Agent Decision</div>
+            <div class="agent-decision-badge" id="agent-badge">—</div>
+            <p class="agent-reasoning" id="agent-reasoning"></p>
+            <div class="agent-likelihood" id="agent-likelihood" style="display:none">
+              <span>Fraud likelihood:</span>
+              <div class="likelihood-bar-track">
+                <div class="likelihood-bar-fill" id="likelihood-fill" style="width:0%"></div>
+              </div>
+              <span id="likelihood-val" style="font-weight:700;color:var(--tv-text)"></span>
+            </div>
+          </div>
+
+        </div><!-- /score-result -->
+      </div><!-- /live-feed -->
+
+    </div><!-- /right-panel -->
+  </div><!-- /split -->
+
+  <script>
+    const CHECKS = ['verification','simswap','callforwarding','kycmatch','location','device'];
+    const STAGGER_MS = 1800; // time between each check going "active" during loading
+
+    const ICON_CHECK = '<polyline points="9 12 11 14 15 10"/>';
+    const ICON_X     = '<line x1="15" y1="9" x2="9" y2="15"/><line x1="9" y1="9" x2="15" y2="15"/>';
+    const ICON_WARN  = '<line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/>';
+
+    function svgIcon(path) {
+      return `<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/>${path}</svg>`;
+    }
+
+    function setCheckSpinning(id) {
+      const row = document.getElementById(`check-${id}`);
+      const icon = document.getElementById(`ci-${id}`);
+      const status = document.getElementById(`cs-${id}`);
+      row.className = 'check-row active';
+      icon.className = 'check-icon spinning';
+      icon.innerHTML = '<div class="mini-spinner"></div>';
+      status.textContent = 'Checking...';
+    }
+
+    function resolveCheck(id, cssClass, iconPath, statusText, points) {
+      const row = document.getElementById(`check-${id}`);
+      const icon = document.getElementById(`ci-${id}`);
+      const status = document.getElementById(`cs-${id}`);
+      const pts = document.getElementById(`cp-${id}`);
+
+      row.className = `check-row done-${cssClass}`;
+      icon.className = `check-icon ${cssClass}`;
+      icon.innerHTML = `<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">${iconPath}</svg>`;
+      status.textContent = statusText;
+      pts.textContent = points > 0 ? `+${points} pts` : '+0 pts';
+      pts.className = `check-pts ${points > 0 ? 'flagged' : 'clean'}`;
+      pts.style.display = 'block';
+    }
+
+    async function handleSubmit(e) {
+      e.preventDefault();
+
+      const phone     = document.getElementById('phone').value.trim();
+      const ownerName = document.getElementById('owner-name').value.trim();
+      const bizName   = document.getElementById('business-name').value.trim();
+      const location  = document.getElementById('location').value;
+      const bizType   = document.getElementById('biz-type').value;
+
+      if (!phone) return;
+
+      // UI: switch to live feed
+      const btn = document.getElementById('reg-btn');
+      btn.classList.add('loading');
+      btn.disabled = true;
+
+      document.getElementById('waiting-state').style.display = 'none';
+      const feed = document.getElementById('live-feed');
+      feed.style.display = 'flex';
+
+      // Populate merchant bar
+      document.getElementById('bar-name').textContent = bizName;
+      document.getElementById('bar-meta').textContent = `${ownerName} · ${bizType} · ${location} · ${phone}`;
+
+      // Hide score result until done
+      document.getElementById('score-result').style.display = 'none';
+
+      // Reset all rows to default
+      CHECKS.forEach(id => {
+        document.getElementById(`check-${id}`).className = 'check-row';
+        document.getElementById(`ci-${id}`).className = 'check-icon';
+        document.getElementById(`cs-${id}`).textContent = 'Queued';
+        const pts = document.getElementById(`cp-${id}`);
+        pts.style.display = 'none';
+      });
+
+      // Animate checks loading one by one while API call runs
+      let staggerTimers = [];
+      CHECKS.forEach((id, i) => {
+        const t = setTimeout(() => setCheckSpinning(id), i * STAGGER_MS);
+        staggerTimers.push(t);
+      });
+
+      // Fire the real API call
+      let data;
+      try {
+        const isHighDemo = phone === '+99999990000';
+        const url  = isHighDemo ? 'http://localhost:3000/api/verify/demo' : 'http://localhost:3000/api/verify';
+        const body = isHighDemo
+          ? { phoneNumber: phone, scenario: 'high' }
+          : { phoneNumber: phone, latitude: 6.5244, longitude: 3.3792, name: ownerName };
+
+        const res = await fetch(url, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(body),
+        });
+        data = await res.json();
+        if (!data.success) throw new Error(data.error || 'Verification failed');
+      } catch (err) {
+        staggerTimers.forEach(clearTimeout);
+        CHECKS.forEach(id => resolveCheck(id, 'fail', ICON_X, 'Error', 0));
+        btn.classList.remove('loading');
+        btn.disabled = false;
+        return;
+      }
+
+      // Cancel remaining stagger timers — resolve immediately
+      staggerTimers.forEach(clearTimeout);
+
+      const bd = data.breakdown;
+
+      // ── Resolve each check with real data ──
+      const resolvers = [
+        () => {
+          const v = bd.verification?.verified;
+          resolveCheck('verification', v ? 'pass' : 'fail', v ? ICON_CHECK : ICON_X, v ? 'Verified' : 'Unverified', v ? 0 : 25);
+        },
+        () => {
+          const s = bd.simSwap?.swapDetected;
+          resolveCheck('simswap', s ? 'fail' : 'pass', s ? ICON_X : ICON_CHECK, s ? 'Swap Detected' : 'No Swap', s ? 25 : 0);
+        },
+        () => {
+          const cf = bd.callForwarding?.callForwarding;
+          resolveCheck('callforwarding', cf ? 'fail' : 'pass', cf ? ICON_X : ICON_CHECK, cf ? 'Active' : 'Inactive', cf ? 20 : 0);
+        },
+        () => {
+          const k = bd.kycMatch?.kycMatch;
+          resolveCheck('kycmatch', k ? 'pass' : 'fail', k ? ICON_CHECK : ICON_X, k ? 'Name Match' : 'No Match', k ? 0 : 15);
+        },
+        () => {
+          const l = bd.location?.locationMatch;
+          resolveCheck('location', l ? 'pass' : 'fail', l ? ICON_CHECK : ICON_X, l ? 'In Region' : 'Out of Region', l ? 0 : 10);
+        },
+        () => {
+          const st = bd.deviceStatus?.status || 'UNKNOWN';
+          const cls  = st === 'CONNECTED_DATA' ? 'pass' : st === 'CONNECTED_SMS' ? 'warn' : 'fail';
+          const icon = st === 'CONNECTED_DATA' ? ICON_CHECK : st === 'CONNECTED_SMS' ? ICON_WARN : ICON_X;
+          const lbl  = st === 'CONNECTED_DATA' ? 'Data Active' : st === 'CONNECTED_SMS' ? 'SMS Only' : st === 'NOT_CONNECTED' ? 'Offline' : st.replace(/_/g,' ');
+          resolveCheck('device', cls, icon, lbl, st === 'NOT_CONNECTED' ? 5 : 0);
+        },
+      ];
+
+      // Stagger the resolve animations
+      resolvers.forEach((fn, i) => setTimeout(fn, i * 220));
+
+      // Show score result after all checks resolve
+      setTimeout(() => showScoreResult(data), resolvers.length * 220 + 200);
+
+      btn.classList.remove('loading');
+      btn.disabled = false;
+    }
+
+    function showScoreResult(data) {
+      const { riskLevel, score, recommendation, alertSent, agentDecision } = data;
+
+      const result = document.getElementById('score-result');
+      result.style.display = 'block';
+
+      // Badge
+      const badge = document.getElementById('risk-badge');
+      badge.className = `risk-badge ${riskLevel}`;
+      document.getElementById('risk-label').textContent = riskLevel;
+
+      // Score
+      document.getElementById('score-num').innerHTML = `${score}<span>/100</span>`;
+
+      // Bar
+      const bar = document.getElementById('score-bar');
+      const barColor = riskLevel === 'LOW' ? 'var(--tv-green)' : riskLevel === 'MEDIUM' ? 'var(--yellow)' : 'var(--red)';
+      bar.style.background = barColor;
+      bar.style.boxShadow = `0 0 8px ${barColor}`;
+      setTimeout(() => { bar.style.width = `${score}%`; }, 50);
+
+      // Recommendation
+      const recBox = document.getElementById('rec-box');
+      recBox.className = `rec-box ${riskLevel}`;
+      document.getElementById('rec-text').textContent = recommendation;
+
+      const iconPaths = {
+        LOW:    ICON_CHECK,
+        MEDIUM: ICON_WARN,
+        HIGH:   ICON_X,
+      };
+      document.getElementById('rec-icon').innerHTML =
+        `<circle cx="12" cy="12" r="10"/>${iconPaths[riskLevel]}`;
+
+      // Alert row
+      const alertRow = document.getElementById('alert-row');
+      if (alertSent) {
+        alertRow.style.display = 'flex';
+        alertRow.className = 'alert-row sent';
+        document.getElementById('alert-text').textContent = 'WhatsApp alert sent to merchant';
+      } else {
+        alertRow.style.display = 'none';
+      }
+
+      // Agent decision
+      const agentBox = document.getElementById('agent-box');
+      if (agentDecision && agentDecision.escalated) {
+        agentBox.style.display = 'block';
+        const isBlock = agentDecision.decision === 'BLOCK';
+        agentBox.className = `agent-box ${isBlock ? 'block' : 'approve'}`;
+
+        const agentBadge = document.getElementById('agent-badge');
+        agentBadge.className = `agent-decision-badge ${isBlock ? 'block' : 'approve'}`;
+        agentBadge.innerHTML = isBlock
+          ? `<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="15" y1="9" x2="9" y2="15"/><line x1="9" y1="9" x2="15" y2="15"/></svg> BLOCK`
+          : `<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="9 12 11 14 15 10"/></svg> ESCALATE TO HUMAN`;
+
+        document.getElementById('agent-reasoning').textContent = agentDecision.reasoning;
+
+        if (agentDecision.fraudLikelihood != null) {
+          const likEl = document.getElementById('agent-likelihood');
+          likEl.style.display = 'flex';
+          document.getElementById('likelihood-val').textContent = `${agentDecision.fraudLikelihood}/10`;
+          const fill = document.getElementById('likelihood-fill');
+          fill.style.background = isBlock ? 'var(--red)' : 'var(--tv-green)';
+          setTimeout(() => { fill.style.width = `${agentDecision.fraudLikelihood * 10}%`; }, 100);
+        }
+      } else if (agentDecision && !agentDecision.escalated) {
+        agentBox.style.display = 'block';
+        agentBox.className = 'agent-box approve';
+        const agentBadge = document.getElementById('agent-badge');
+        agentBadge.className = 'agent-decision-badge approve';
+        agentBadge.innerHTML = `<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="9 12 11 14 15 10"/></svg> APPROVED`;
+        document.getElementById('agent-reasoning').textContent = 'Risk level is within acceptable range. Transaction approved.';
+      }
+
+      result.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+    }
+  </script>
+
+</body>
+</html>
