@@ -590,6 +590,49 @@
       border-radius: 99px;
     }
 
+    /* ── Merchant response ── */
+    .merchant-response-box {
+      margin-top: 10px;
+      border-radius: var(--radius-sm);
+      padding: 14px;
+      border: 1px solid rgba(245,197,24,0.25);
+      background: var(--yellow-dim);
+      display: flex;
+      align-items: flex-start;
+      gap: 12px;
+    }
+
+    .merchant-response-pulse {
+      width: 10px; height: 10px;
+      border-radius: 50%;
+      background: var(--yellow);
+      flex-shrink: 0;
+      margin-top: 4px;
+      animation: pulse-yellow 1.4s ease-in-out infinite;
+    }
+
+    @keyframes pulse-yellow { 0%,100%{opacity:1;transform:scale(1);} 50%{opacity:0.4;transform:scale(0.75);} }
+
+    .merchant-response-body {}
+    .merchant-response-label {
+      font-size: 0.67rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      color: rgba(245,197,24,0.7);
+      margin-bottom: 5px;
+    }
+    .merchant-response-text {
+      font-size: 0.82rem;
+      color: var(--yellow);
+      line-height: 1.5;
+    }
+    .merchant-response-sub {
+      font-size: 0.72rem;
+      color: rgba(245,197,24,0.55);
+      margin-top: 4px;
+    }
+
     /* ── Mobile ── */
     @media (max-width: 768px) {
       .split { grid-template-columns: 1fr; }
@@ -862,6 +905,16 @@
             </div>
           </div>
 
+          <!-- Merchant response (MEDIUM only) -->
+          <div class="merchant-response-box" id="merchant-response" style="display:none">
+            <div class="merchant-response-pulse"></div>
+            <div class="merchant-response-body">
+              <div class="merchant-response-label">Merchant Response</div>
+              <div class="merchant-response-text">Waiting for merchant confirmation via WhatsApp...</div>
+              <div class="merchant-response-sub">A YES/NO prompt has been sent. Reply will update account status automatically.</div>
+            </div>
+          </div>
+
         </div><!-- /score-result -->
       </div><!-- /live-feed -->
 
@@ -1090,6 +1143,10 @@
         agentBadge.innerHTML = `<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="9 12 11 14 15 10"/></svg> APPROVED`;
         document.getElementById('agent-reasoning').textContent = 'Risk level is within acceptable range. Transaction approved.';
       }
+
+      // Merchant response pending — show only for MEDIUM
+      document.getElementById('merchant-response').style.display =
+        riskLevel === 'MEDIUM' ? 'flex' : 'none';
 
       result.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
     }

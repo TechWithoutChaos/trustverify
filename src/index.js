@@ -183,6 +183,49 @@ app.post('/api/verify/demo', (req, res) => {
   });
 });
 
+// POST /webhook/whatsapp — incoming WhatsApp replies from Twilio
+app.post('/webhook/whatsapp', express.urlencoded({ extended: false }), async (req, res) => {
+  const rawBody = (req.body.Body || '').trim().toUpperCase();
+  const from    = (req.body.From || '').replace('whatsapp:', '').trim();
+
+  let replyText;
+
+  try {
+    // Look up the most recent transaction for this number
+    const { data: tx, error: txErr } = await supabase
+      .from('transactions')
+      .select('id, risk_level')
+      .eq('phone_number', from)
+      .order('created_at', { ascending: false })
+      .limit(1)
+      .single();
+
+    if (txErr || !tx) {
+      replyText = 'Abeg reply YES to confirm your registration or NO to cancel am.';
+    } else if (rawBody === 'YES' && tx.risk_level === 'MEDIUM') {
+      await supabase
+        .from('transactions')
+        .update({ account_status: 'VERIFIED' })
+        .eq('id', tx.id);
+      replyText = '✅ Identity confirmed. Your VendEx account don activate. You fit start trading now. Welcome! TrustVerify by TechWithoutChaos';
+    } else if (rawBody === 'NO') {
+      await supabase
+        .from('transactions')
+        .update({ account_status: 'FLAGGED' })
+        .eq('id', tx.id);
+      replyText = '⚠️ Thank you for letting us know. We don flag this registration for security review. Your account don freeze. Contact VendEx support if you need help. TrustVerify by TechWithoutChaos';
+    } else {
+      replyText = 'Abeg reply YES to confirm your registration or NO to cancel am.';
+    }
+  } catch (err) {
+    replyText = 'Abeg reply YES to confirm your registration or NO to cancel am.';
+  }
+
+  const twiml = `<?xml version="1.0" encoding="UTF-8"?><Response><Message>${replyText}</Message></Response>`;
+  res.set('Content-Type', 'text/xml');
+  res.send(twiml);
+});
+
 // GET /api/health
 app.get('/api/health', (req, res) => {
   res.json({ status: 'TrustVerify API is running', timestamp: new Date().toISOString() });
