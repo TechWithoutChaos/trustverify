@@ -951,11 +951,8 @@
       // Fire the real API call
       let data;
       try {
-        const isHighDemo = phone === '+99999990000';
-        const url  = isHighDemo ? 'http://localhost:3000/api/verify/demo' : 'http://localhost:3000/api/verify';
-        const body = isHighDemo
-          ? { phoneNumber: phone, scenario: 'high' }
-          : { phoneNumber: phone, latitude: 6.5244, longitude: 3.3792, name: ownerName };
+        const url  = 'http://localhost:3000/api/verify';
+        const body = { phoneNumber: phone, latitude: 6.5244, longitude: 3.3792, name: ownerName };
 
         const res = await fetch(url, {
           method: 'POST',

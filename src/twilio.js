@@ -8,38 +8,44 @@ const twilioClient = twilio(
   process.env.TWILIO_AUTH_TOKEN
 );
 
-function buildBreakdownLines(breakdown) {
+function buildFlaggedSignals(breakdown) {
   const lines = [];
-  if (breakdown.verification?.verified === false) {
-    lines.push('• Phone number verification failed');
-  }
-  if (breakdown.simSwap?.swapDetected === true) {
-    lines.push('• SIM swap detected for this number');
-  }
-  if (breakdown.deviceStatus?.status && breakdown.deviceStatus.status !== 'CONNECTED') {
-    lines.push(`• Device connectivity issue: ${breakdown.deviceStatus.status}`);
-  }
-  return lines.length > 0 ? lines.join('\n') : '• Suspicious pattern detected';
+  if (breakdown.verification?.verified === false)
+    lines.push('❌ Your phone number no verify');
+  if (breakdown.simSwap?.swapDetected === true)
+    lines.push('❌ SIM card recently swapped');
+  if (breakdown.callForwarding?.callForwarding === true)
+    lines.push('❌ Call forwarding active on your line');
+  if (breakdown.kycMatch?.kycMatch === false)
+    lines.push('❌ Your details no match network records');
+  if (breakdown.location?.locationMatch === false)
+    lines.push('❌ Your location no match registered area');
+  if (breakdown.deviceStatus?.status === 'NOT_CONNECTED')
+    lines.push('❌ Your device show as offline');
+  return lines;
 }
 
 function buildMessage(phoneNumber, riskData) {
-  const { riskLevel, breakdown } = riskData;
+  const { riskLevel, score, breakdown } = riskData;
+  const flags = buildFlaggedSignals(breakdown);
+  const flagList = flags.length > 0 ? flags.join('\n') : '❌ Suspicious pattern detected';
 
   if (riskLevel === 'HIGH') {
-    return `⚠️ TRUSTVERIFY ALERT ⚠️
+    return `🚨 TRUSTVERIFY ALERT 🚨
 
-Madam/Oga, e get suspicious activity on top your VendEx account.
+Madam/Oga, we don block this transaction. E get serious wahala for your account.
 
-Phone number: ${phoneNumber}
 Risk Level: HIGH 🔴
+Score: ${score}/100
 
 Wetin we see:
-${buildBreakdownLines(breakdown)}
+${flagList}
 
-We don pause this transaction for your protection.
-
+We don pause everything for your protection.
 If na you do am, reply YES.
 If you no do am, reply NO sharp sharp.
+
+Your account don escalate to our security team.
 
 TrustVerify by TechWithoutChaos`;
   }
@@ -47,20 +53,28 @@ TrustVerify by TechWithoutChaos`;
   if (riskLevel === 'MEDIUM') {
     return `⚠️ TRUSTVERIFY NOTICE
 
-Oga/Madam, we see something small on your account wey need your attention.
+Oga/Madam, we see something wey need your attention.
 
-Phone number: ${phoneNumber}
 Risk Level: MEDIUM 🟡
+Score: ${score}/100
+
+Wetin we see:
+${flagList}
 
 Abeg verify say na you do this transaction before e complete.
+Reply YES to confirm or NO to cancel.
 
 TrustVerify by TechWithoutChaos`;
   }
 
   return `✅ TRUSTVERIFY CLEAR
 
-Your transaction don verify. Everything clean.
+Oga/Madam, everything don check out. Your account clean.
+
 Risk Level: LOW 🟢
+Score: ${score}/100
+
+No suspicious activity detected. Your transaction don approve.
 
 TrustVerify by TechWithoutChaos`;
 }

@@ -14,6 +14,49 @@ app.use(cors());
 app.use(express.json());
 app.use(express.static('public'));
 
+const RECOMMENDATIONS = {
+  LOW:    'Transaction approved. No suspicious activity detected.',
+  MEDIUM: 'Proceed with caution. Request additional merchant verification.',
+  HIGH:   'Transaction blocked. Suspicious network activity detected. Merchant alert triggered.',
+};
+
+// Mock Nokia data for three reliable demo numbers — bypasses live API calls
+const DEMO_NUMBER_MOCKS = {
+  '+99999991001': {
+    score: 0, riskLevel: 'LOW',
+    breakdown: {
+      verification:   { verified: true,  phoneNumber: '+99999991001' },
+      simSwap:        { swapDetected: false, phoneNumber: '+99999991001' },
+      callForwarding: { callForwarding: false, phoneNumber: '+99999991001' },
+      kycMatch:       { kycMatch: true,  phoneNumber: '+99999991001' },
+      location:       { locationMatch: true,  phoneNumber: '+99999991001' },
+      deviceStatus:   { status: 'CONNECTED_DATA', phoneNumber: '+99999991001' },
+    },
+  },
+  '+99999995000': {
+    score: 25, riskLevel: 'MEDIUM',
+    breakdown: {
+      verification:   { verified: true,  phoneNumber: '+99999995000' },
+      simSwap:        { swapDetected: true,  phoneNumber: '+99999995000' },
+      callForwarding: { callForwarding: false, phoneNumber: '+99999995000' },
+      kycMatch:       { kycMatch: true,  phoneNumber: '+99999995000' },
+      location:       { locationMatch: true,  phoneNumber: '+99999995000' },
+      deviceStatus:   { status: 'CONNECTED_SMS', phoneNumber: '+99999995000' },
+    },
+  },
+  '+99999991000': {
+    score: 70, riskLevel: 'HIGH',
+    breakdown: {
+      verification:   { verified: true,  phoneNumber: '+99999991000' },
+      simSwap:        { swapDetected: true,  phoneNumber: '+99999991000' },
+      callForwarding: { callForwarding: true,  phoneNumber: '+99999991000' },
+      kycMatch:       { kycMatch: false, phoneNumber: '+99999991000' },
+      location:       { locationMatch: false, phoneNumber: '+99999991000' },
+      deviceStatus:   { status: 'CONNECTED_SMS', phoneNumber: '+99999991000' },
+    },
+  },
+};
+
 // POST /api/verify
 app.post('/api/verify', async (req, res) => {
   try {
@@ -23,7 +66,25 @@ app.post('/api/verify', async (req, res) => {
       return res.status(400).json({ success: false, error: 'phoneNumber is required' });
     }
 
-    const riskData = await calculateRiskScore(phoneNumber, latitude, longitude, name);
+    let riskData;
+    const mock = DEMO_NUMBER_MOCKS[phoneNumber];
+
+    if (mock) {
+      const ts = new Date().toISOString();
+      const breakdown = Object.fromEntries(
+        Object.entries(mock.breakdown).map(([k, v]) => [k, { ...v, timestamp: ts }])
+      );
+      riskData = {
+        phoneNumber,
+        score: mock.score,
+        riskLevel: mock.riskLevel,
+        recommendation: RECOMMENDATIONS[mock.riskLevel],
+        breakdown,
+        timestamp: ts,
+      };
+    } else {
+      riskData = await calculateRiskScore(phoneNumber, latitude, longitude, name);
+    }
 
     let alertSent = false;
     if (riskData.riskLevel === 'HIGH' || riskData.riskLevel === 'MEDIUM') {

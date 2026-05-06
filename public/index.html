@@ -764,9 +764,8 @@
       btn.disabled = true;
 
       try {
-        const isHighDemo = phone === '+99999990000';
-        const url = isHighDemo ? 'http://localhost:3000/api/verify/demo' : 'http://localhost:3000/api/verify';
-        const body = isHighDemo ? { phoneNumber: phone, scenario: 'high' } : { phoneNumber: phone };
+        const url = 'http://localhost:3000/api/verify';
+        const body = { phoneNumber: phone };
 
         const res = await fetch(url, {
           method: 'POST',
