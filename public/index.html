@@ -764,7 +764,7 @@
       btn.disabled = true;
 
       try {
-        const url = 'http://localhost:3000/api/verify';
+        const url = '/api/verify';
         const body = { phoneNumber: phone };
 
         const res = await fetch(url, {

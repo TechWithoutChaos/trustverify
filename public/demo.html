@@ -1004,7 +1004,7 @@
       // Fire the real API call
       let data;
       try {
-        const url  = 'http://localhost:3000/api/verify';
+        const url  = '/api/verify';
         const body = { phoneNumber: phone, latitude: 6.5244, longitude: 3.3792, name: ownerName };
 
         const res = await fetch(url, {
