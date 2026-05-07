@@ -1,0 +1,18 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(curl -s -X POST http://localhost:3000/api/verify -H \"Content-Type: application/json\" -d \"{\"\"phoneNumber\"\": \"\"+99999991000\"\"}\")",
+      "Bash(npm run:*)",
+      "Bash(curl:*)",
+      "Bash(ipconfig:*)",
+      "Bash(start:*)",
+      "Skill(claude-api)",
+      "Bash(node -e \"process.stdin.resume\\(\\);let d='''''''';process.stdin.on\\(''''data'''',c=>d+=c\\);process.stdin.on\\(''''end'''',\\(\\)=>console.log\\(JSON.stringify\\(JSON.parse\\(d\\),null,2\\)\\)\\)\")",
+      "Bash(git init:*)",
+      "Bash(git commit:*)",
+      "Bash(node -e \"const d=[];process.stdin.on\\(''''data'''',c=>d.push\\(c\\)\\);process.stdin.on\\(''''end'''',\\(\\)=>{const j=JSON.parse\\(d.join\\(''''''''\\)\\);console.log\\(''''riskLevel:'''',j.riskLevel,''''| score:'''',j.score,''''| alertSent:'''',j.alertSent\\)}\\)\")",
+      "Bash(git add:*)",
+      "Bash(git push:*)"
+    ]
+  }
+}
