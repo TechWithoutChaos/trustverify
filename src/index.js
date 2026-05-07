@@ -5,6 +5,7 @@ import express from 'express';
 import cors from 'cors';
 
 import { calculateRiskScore } from './riskScore.js';
+import { checkSimSwap } from './nokia.js';
 import { sendWhatsAppAlert } from './twilio.js';
 import { logTransaction, getSupabase } from './supabase.js';
 import { runAgentEscalation } from './agent.js';
@@ -224,6 +225,12 @@ app.post('/webhook/whatsapp', express.urlencoded({ extended: false }), async (re
   const twiml = `<?xml version="1.0" encoding="UTF-8"?><Response><Message>${replyText}</Message></Response>`;
   res.set('Content-Type', 'text/xml');
   res.send(twiml);
+});
+
+// GET /api/test-nokia
+app.get('/api/test-nokia', async (req, res) => {
+  const result = await checkSimSwap('+99999995000');
+  res.json(result);
 });
 
 // GET /api/debug

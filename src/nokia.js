@@ -21,6 +21,7 @@ export async function verifyNumber(phoneNumber) {
       timestamp: new Date().toISOString(),
     };
   } catch (err) {
+    console.error('[nokia] verifyNumber error:', { message: err.message, status: err.status, response: err.response, stack: err.stack });
     return { error: err.message, phoneNumber, timestamp: new Date().toISOString() };
   }
 }
@@ -39,6 +40,7 @@ export async function checkSimSwap(phoneNumber) {
       timestamp: new Date().toISOString(),
     };
   } catch (err) {
+    console.error('[nokia] checkSimSwap error:', { message: err.message, status: err.status, response: err.response, stack: err.stack });
     return { error: err.message, phoneNumber, timestamp: new Date().toISOString() };
   }
 }
@@ -57,6 +59,7 @@ export async function checkLocation(phoneNumber, latitude, longitude) {
       timestamp: new Date().toISOString(),
     };
   } catch (err) {
+    console.error('[nokia] checkLocation error:', { message: err.message, status: err.status, response: err.response, stack: err.stack });
     return { error: err.message, phoneNumber, timestamp: new Date().toISOString() };
   }
 }
@@ -75,6 +78,7 @@ export async function checkCallForwarding(phoneNumber) {
       timestamp: new Date().toISOString(),
     };
   } catch (err) {
+    console.error('[nokia] checkCallForwarding error:', { message: err.message, status: err.status, response: err.response, stack: err.stack });
     return { error: err.message, callForwarding: false, phoneNumber, timestamp: new Date().toISOString() };
   }
 }
@@ -93,6 +97,7 @@ export async function checkKYCMatch(phoneNumber, name) {
       timestamp: new Date().toISOString(),
     };
   } catch (err) {
+    console.error('[nokia] checkKYCMatch error:', { message: err.message, status: err.status, response: err.response, stack: err.stack });
     return { error: err.message, kycMatch: true, phoneNumber, timestamp: new Date().toISOString() };
   }
 }
@@ -111,6 +116,7 @@ export async function checkDeviceStatus(phoneNumber) {
       timestamp: new Date().toISOString(),
     };
   } catch (err) {
+    console.error('[nokia] checkDeviceStatus error:', { message: err.message, status: err.status, response: err.response, stack: err.stack });
     return { error: err.message, phoneNumber, timestamp: new Date().toISOString() };
   }
 }
