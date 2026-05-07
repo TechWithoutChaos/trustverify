@@ -109,6 +109,7 @@ app.post('/api/verify', async (req, res) => {
       timestamp: riskData.timestamp,
     });
   } catch (err) {
+    console.error('[/api/verify] top-level error:', { message: err.message, status: err.status, response: err.response, stack: err.stack });
     return res.status(500).json({ success: false, error: err.message });
   }
 });
