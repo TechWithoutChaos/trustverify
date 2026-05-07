@@ -193,17 +193,19 @@ app.post('/webhook/whatsapp', express.urlencoded({ extended: false }), async (re
   let replyText;
 
   try {
-    // Look up the most recent transaction for this number
+    // Look up the most recent UNRESOLVED transaction regardless of phone number
     const { data: tx, error: txErr } = await getSupabase()
       .from('transactions')
-      .select('id, risk_level')
-      .eq('phone_number', from)
+      .select('id, risk_level, account_status')
+      .is('account_status', null)
       .order('created_at', { ascending: false })
       .limit(1)
       .single();
 
     if (txErr || !tx) {
       replyText = 'Abeg reply YES to confirm your registration or NO to cancel am.';
+    } else if (tx.account_status === 'VERIFIED' || tx.account_status === 'FLAGGED') {
+      replyText = 'Your account status don already update. No need to reply again.';
     } else if (rawBody === 'YES' && tx.risk_level === 'MEDIUM') {
       await getSupabase()
         .from('transactions')
