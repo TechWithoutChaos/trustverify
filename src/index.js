@@ -202,15 +202,16 @@ app.post('/webhook/whatsapp', express.urlencoded({ extended: false }), async (re
       .limit(1)
       .single();
 
+    console.log('[webhook] rawBody:', rawBody, '| txErr:', txErr, '| tx:', tx);
+
     if (txErr || !tx) {
-      replyText = 'Abeg reply YES to confirm your registration or NO to cancel am.';
-    } else if (tx.account_status === 'VERIFIED' || tx.account_status === 'FLAGGED') {
-      replyText = 'Your account status don already update. No need to reply again.';
-    } else if (rawBody === 'YES' && tx.risk_level === 'MEDIUM') {
-      await getSupabase()
+      replyText = 'Your account status don already update.';
+    } else if (rawBody === 'YES') {
+      const { error: updateErr } = await getSupabase()
         .from('transactions')
         .update({ account_status: 'VERIFIED' })
         .eq('id', tx.id);
+      console.log('[webhook] YES update result — id:', tx.id, '| updateErr:', updateErr);
       replyText = '✅ Identity confirmed. Your VendEx account don activate. You fit start trading now. Welcome! TrustVerify by TechWithoutChaos';
     } else if (rawBody === 'NO') {
       await getSupabase()
