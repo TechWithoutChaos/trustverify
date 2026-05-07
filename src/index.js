@@ -226,6 +226,21 @@ app.post('/webhook/whatsapp', express.urlencoded({ extended: false }), async (re
   res.send(twiml);
 });
 
+// GET /api/debug
+app.get('/api/debug', (req, res) => {
+  res.json({
+    NOKIA_API_KEY: process.env.NOKIA_API_KEY ? 'SET' : 'MISSING',
+    ANTHROPIC_API_KEY: process.env.ANTHROPIC_API_KEY ? 'SET' : 'MISSING',
+    TWILIO_ACCOUNT_SID: process.env.TWILIO_ACCOUNT_SID ? 'SET' : 'MISSING',
+    TWILIO_AUTH_TOKEN: process.env.TWILIO_AUTH_TOKEN ? 'SET' : 'MISSING',
+    TWILIO_WHATSAPP_FROM: process.env.TWILIO_WHATSAPP_FROM ? 'SET' : 'MISSING',
+    TWILIO_WHATSAPP_TO: process.env.TWILIO_WHATSAPP_TO ? 'SET' : 'MISSING',
+    SUPABASE_URL: process.env.SUPABASE_URL ? 'SET' : 'MISSING',
+    SUPABASE_ANON_KEY: process.env.SUPABASE_ANON_KEY ? 'SET' : 'MISSING',
+    NODE_ENV: process.env.NODE_ENV,
+  });
+});
+
 // GET /api/health
 app.get('/api/health', (req, res) => {
   res.json({ status: 'TrustVerify API is running', timestamp: new Date().toISOString() });
