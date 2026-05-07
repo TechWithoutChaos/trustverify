@@ -2,10 +2,14 @@ import dotenv from 'dotenv';
 dotenv.config();
 
 import Anthropic from '@anthropic-ai/sdk';
-import { supabase } from './supabase.js';
+import { getSupabase } from './supabase.js';
 import { sendWhatsAppAlert } from './twilio.js';
 
-const anthropic = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY });
+let _anthropic;
+function getAnthropic() {
+  if (!_anthropic) _anthropic = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY });
+  return _anthropic;
+}
 
 const SYSTEM_PROMPT = `You are TrustVerify, an AI fraud detection agent for African SME merchants. You analyze network signals and make autonomous decisions to protect merchants from fraud. You are decisive, clear, and always explain your reasoning in simple terms that a Nigerian market trader would understand.`;
 
@@ -51,7 +55,7 @@ export async function runAgentEscalation(phoneNumber, riskData) {
   let agentResponse;
 
   try {
-    const response = await anthropic.messages.create({
+    const response = await getAnthropic().messages.create({
       model: 'claude-sonnet-4-6',
       max_tokens: 1024,
       system: SYSTEM_PROMPT,
@@ -71,7 +75,7 @@ export async function runAgentEscalation(phoneNumber, riskData) {
 
   // Log to Supabase
   try {
-    await supabase.from('agent_escalations').insert([{
+    await getSupabase().from('agent_escalations').insert([{
       phone_number: phoneNumber,
       risk_score: riskData.score,
       reasoning: agentResponse.reasoning,

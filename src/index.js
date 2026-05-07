@@ -6,7 +6,7 @@ import cors from 'cors';
 
 import { calculateRiskScore } from './riskScore.js';
 import { sendWhatsAppAlert } from './twilio.js';
-import { logTransaction, supabase } from './supabase.js';
+import { logTransaction, getSupabase } from './supabase.js';
 import { runAgentEscalation } from './agent.js';
 
 const app = express();
@@ -192,7 +192,7 @@ app.post('/webhook/whatsapp', express.urlencoded({ extended: false }), async (re
 
   try {
     // Look up the most recent transaction for this number
-    const { data: tx, error: txErr } = await supabase
+    const { data: tx, error: txErr } = await getSupabase()
       .from('transactions')
       .select('id, risk_level')
       .eq('phone_number', from)
@@ -203,13 +203,13 @@ app.post('/webhook/whatsapp', express.urlencoded({ extended: false }), async (re
     if (txErr || !tx) {
       replyText = 'Abeg reply YES to confirm your registration or NO to cancel am.';
     } else if (rawBody === 'YES' && tx.risk_level === 'MEDIUM') {
-      await supabase
+      await getSupabase()
         .from('transactions')
         .update({ account_status: 'VERIFIED' })
         .eq('id', tx.id);
       replyText = '✅ Identity confirmed. Your VendEx account don activate. You fit start trading now. Welcome! TrustVerify by TechWithoutChaos';
     } else if (rawBody === 'NO') {
-      await supabase
+      await getSupabase()
         .from('transactions')
         .update({ account_status: 'FLAGGED' })
         .eq('id', tx.id);
@@ -234,7 +234,7 @@ app.get('/api/health', (req, res) => {
 // GET /api/transactions
 app.get('/api/transactions', async (req, res) => {
   try {
-    const { data, error } = await supabase
+    const { data, error } = await getSupabase()
       .from('transactions')
       .select('*')
       .order('created_at', { ascending: false })

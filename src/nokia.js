@@ -3,11 +3,15 @@ dotenv.config();
 
 import { NetworkAsCodeClient } from 'network-as-code';
 
-const client = new NetworkAsCodeClient(process.env.NOKIA_API_KEY);
+let _client;
+function getClient() {
+  if (!_client) _client = new NetworkAsCodeClient(process.env.NOKIA_API_KEY);
+  return _client;
+}
 
 export async function verifyNumber(phoneNumber) {
   try {
-    const device = client.devices.get({
+    const device = getClient().devices.get({
       phoneNumber: phoneNumber || '+99999999999',
     });
 
@@ -23,7 +27,7 @@ export async function verifyNumber(phoneNumber) {
 
 export async function checkSimSwap(phoneNumber) {
   try {
-    const device = client.devices.get({
+    const device = getClient().devices.get({
       phoneNumber: phoneNumber || '+99999999999',
     });
 
@@ -41,7 +45,7 @@ export async function checkSimSwap(phoneNumber) {
 
 export async function checkLocation(phoneNumber, latitude, longitude) {
   try {
-    const device = client.devices.get({
+    const device = getClient().devices.get({
       phoneNumber: phoneNumber || '+99999999999',
     });
 
@@ -59,7 +63,7 @@ export async function checkLocation(phoneNumber, latitude, longitude) {
 
 export async function checkCallForwarding(phoneNumber) {
   try {
-    const device = client.devices.get({
+    const device = getClient().devices.get({
       phoneNumber: phoneNumber || '+99999999999',
     });
 
@@ -77,7 +81,7 @@ export async function checkCallForwarding(phoneNumber) {
 
 export async function checkKYCMatch(phoneNumber, name) {
   try {
-    const device = client.devices.get({
+    const device = getClient().devices.get({
       phoneNumber: phoneNumber || '+99999999999',
     });
 
@@ -95,7 +99,7 @@ export async function checkKYCMatch(phoneNumber, name) {
 
 export async function checkDeviceStatus(phoneNumber) {
   try {
-    const device = client.devices.get({
+    const device = getClient().devices.get({
       phoneNumber: phoneNumber || '+99999999999',
     });
 

@@ -3,10 +3,11 @@ dotenv.config();
 
 import twilio from 'twilio';
 
-const twilioClient = twilio(
-  process.env.TWILIO_ACCOUNT_SID,
-  process.env.TWILIO_AUTH_TOKEN
-);
+let _twilioClient;
+function getTwilioClient() {
+  if (!_twilioClient) _twilioClient = twilio(process.env.TWILIO_ACCOUNT_SID, process.env.TWILIO_AUTH_TOKEN);
+  return _twilioClient;
+}
 
 function buildFlaggedSignals(breakdown) {
   const lines = [];
@@ -83,7 +84,7 @@ export async function sendWhatsAppAlert(phoneNumber, riskData) {
   try {
     const body = riskData._overrideBody ?? buildMessage(phoneNumber, riskData);
 
-    const message = await twilioClient.messages.create({
+    const message = await getTwilioClient().messages.create({
       from: process.env.TWILIO_WHATSAPP_FROM,
       to: process.env.TWILIO_WHATSAPP_TO,
       body,

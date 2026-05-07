@@ -3,14 +3,15 @@ dotenv.config();
 
 import { createClient } from '@supabase/supabase-js';
 
-export const supabase = createClient(
-  process.env.SUPABASE_URL,
-  process.env.SUPABASE_ANON_KEY
-);
+let _supabase;
+export function getSupabase() {
+  if (!_supabase) _supabase = createClient(process.env.SUPABASE_URL, process.env.SUPABASE_ANON_KEY);
+  return _supabase;
+}
 
 export async function logTransaction(phoneNumber, riskData, alertSent) {
   try {
-    const { data, error } = await supabase
+    const { data, error } = await getSupabase()
       .from('transactions')
       .insert([
         {
